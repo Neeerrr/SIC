@@ -1,0 +1,69 @@
+en
+conf t 
+
+LINE VTY 0 4 
+PASSWORD VTYPA55
+LOGIN 
+EXIT
+enable secret enpa55
+
+r1
+router ospf 1
+network 192.168.1.0 0.0.0.255 area 0
+network 10.1.1.0 0.0.0.255 area 0
+
+r2
+router ospf 2
+network 10.1.1.0 0.0.0.255 area 0
+network 10.2.2.0 0.0.0.255 area 0
+
+r3
+router ospf 3
+network 10.2.2.0 0.0.0.255 area 0
+network 192.168.3.0 0.0.0.255 area 0
+
+
+------------------------------------------------------
+AAA authentication  (practical 2)
+
+part 1:
+----local login----
+en 
+conf t
+username Admin1 secret admin1pa55
+aaa new-model 
+aaa authentication login default local 
+line console 0 
+login authentication default 
+end 
+
+part 2:
+----remote  login----
+
+for R1----
+en 
+conf t
+ip domain-name ccnasecurity.com
+crypto key generate rsa
+1024
+aaa authentication login SSH-LOGIN local
+line vty 0 4
+login authentication SSH-LOGIN
+transport input ssh
+end
+
+for PC1----
+(in cmd)
+ssh –l Admin1 192.168.1.1
+Password: admin1pa55
+
+
+practical 3 
+
+---use router 2911
+en 
+conf t
+access-list 100 permit tcp 172.22.34.64 0.0.0.31 host 172.22.34.62 eq ftp
+access-list 100 permit icmp 172.22.34.64 0.0.0.31 host 172.22.34.62
+interface gigabitEthernet 0/0 
+ip access-group 100 in
